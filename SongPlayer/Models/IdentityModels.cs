@@ -29,7 +29,9 @@ namespace SongPlayer.Models
         public ApplicationDbContext()
             : base("DefaultConnection", throwIfV1Schema: false)
         {
+            
         }
+
         public DbSet<Song> myFiles { get; set; }
         public DbSet<Album> Albums { get; set; }
         public DbSet<Genre> Genres { get; set; }

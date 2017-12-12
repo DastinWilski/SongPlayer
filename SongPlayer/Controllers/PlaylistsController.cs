@@ -34,6 +34,7 @@ namespace SongPlayer.Controllers
         }
 
         // GET: Playlists/Details/5
+        [Authorize]
         public ActionResult Details(int? id)
         {
             if (id == null)
@@ -77,6 +78,7 @@ namespace SongPlayer.Controllers
         }
 
         // GET: Playlists/Edit/5
+        [Authorize]
         public ActionResult Edit(int? id)
         {
             if (id == null)
@@ -128,6 +130,7 @@ namespace SongPlayer.Controllers
         }
 
         // GET: Playlists/Delete/5
+        [Authorize]
         public ActionResult Delete(int? id)
         {
             if (id == null)

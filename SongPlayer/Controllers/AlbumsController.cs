@@ -8,123 +8,82 @@ using System.Web;
 using System.Web.Mvc;
 using SongPlayer.Models;
 
+
 namespace SongPlayer.Controllers
 {
     public class AlbumsController : Controller
     {
         
         private ApplicationDbContext db = new ApplicationDbContext();
-
-        // GET: Albums
-        [Authorize(Roles = "Admin")]
-        public JsonResult Index()
+       
+        public ActionResult Index()
         {
-            return Json(db.Albums,JsonRequestBehavior.AllowGet);
-        }
-
-        // GET: Albums/Details/5
-        public ActionResult Details(int? id)
-        {
-            if (id == null)
-            {
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
-            }
-            Album album = db.Albums.Find(id);
-            if (album == null)
-            {
-                return HttpNotFound();
-            }
-            return View(album);
-        }
-
-        // GET: Albums/Create
-        [Authorize]
-        public ActionResult Create()
-        {
+          
             return View();
         }
 
-        // POST: Albums/Create
-        // Aby zapewnić ochronę przed atakami polegającymi na przesyłaniu dodatkowych danych, włącz określone właściwości, z którymi chcesz utworzyć powiązania.
-        // Aby uzyskać więcej szczegółów, zobacz https://go.microsoft.com/fwlink/?LinkId=317598.
+        // Get Products list
+        
+        public ActionResult GetProducts()
+        {
+            db.Configuration.ProxyCreationEnabled = false;
+            var tblAlbums = db.Albums.ToList();
+
+            return Json(tblAlbums, JsonRequestBehavior.AllowGet);
+        }
+       
+
+        // Get product by id
+        public ActionResult Get(int id)
+        {
+            db.Configuration.ProxyCreationEnabled = false;
+            var Album = db.Albums.ToList().Find(x => x.AlbumId == id);
+            return Json(Album, JsonRequestBehavior.AllowGet);
+        }
+
+        // Create a new product
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Create([Bind(Include = "AlbumId,AlbumName,Author")] Album album)
+        [Authorize(Roles = "Admin")]
+        public ActionResult Create([Bind(Exclude = "AlbumId,Songs")] Album Album)
         {
             if (ModelState.IsValid)
             {
-                db.Albums.Add(album);
-                db.SaveChanges();
-                return RedirectToAction("Index");
+                db.Albums.Add(Album);
+               db.SaveChanges();
             }
 
-            return View(album);
+            return Json(Album, JsonRequestBehavior.AllowGet);
         }
 
-        // GET: Albums/Edit/5
-        public ActionResult Edit(int? id)
-        {
-            if (id == null)
-            {
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
-            }
-            Album album = db.Albums.Find(id);
-            if (album == null)
-            {
-                return HttpNotFound();
-            }
-            return View(album);
-        }
-
-        // POST: Albums/Edit/5
-        // Aby zapewnić ochronę przed atakami polegającymi na przesyłaniu dodatkowych danych, włącz określone właściwości, z którymi chcesz utworzyć powiązania.
-        // Aby uzyskać więcej szczegółów, zobacz https://go.microsoft.com/fwlink/?LinkId=317598.
+        // Update product
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Edit([Bind(Include = "AlbumId,AlbumName,Author")] Album album)
+        [Authorize(Roles = "Admin")]
+        public ActionResult Update([Bind(Exclude = "Songs")]Album Album)
         {
+          
             if (ModelState.IsValid)
             {
-                db.Entry(album).State = EntityState.Modified;
+                db.Entry(Album).State = EntityState.Modified;
                 db.SaveChanges();
-                return RedirectToAction("Index");
             }
-            return View(album);
+
+            return Json(Album, JsonRequestBehavior.AllowGet);
         }
 
-        // GET: Albums/Delete/5
-        public ActionResult Delete(int? id)
+        // Delete product by id
+        [HttpPost]
+        [Authorize(Roles = "Admin")]
+        public ActionResult Delete(int id)
         {
-            if (id == null)
+            var Album = db.Albums.ToList().Find(x => x.AlbumId == id);
+            if (Album != null)
             {
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+                db.Albums.Remove(Album);
+                db.SaveChanges();
             }
-            Album album = db.Albums.Find(id);
-            if (album == null)
-            {
-                return HttpNotFound();
-            }
-            return View(album);
+
+            return Json(Album, JsonRequestBehavior.AllowGet);
         }
 
-        // POST: Albums/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public ActionResult DeleteConfirmed(int id)
-        {
-            Album album = db.Albums.Find(id);
-            db.Albums.Remove(album);
-            db.SaveChanges();
-            return RedirectToAction("Index");
-        }
-
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                db.Dispose();
-            }
-            base.Dispose(disposing);
-        }
     }
 }

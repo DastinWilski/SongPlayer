@@ -15,7 +15,7 @@ namespace SongPlayer.Controllers
         private ApplicationDbContext db = new ApplicationDbContext();
 
         // GET: Songs
-        [Authorize(Roles = "Admin")]
+        
         public ActionResult Index()
         {
             var myFiles = db.myFiles.Include(s => s.Album).Include(s => s.Genre).Include(s => s.myType);
@@ -41,6 +41,7 @@ namespace SongPlayer.Controllers
         [Authorize]
         public ActionResult Create()
         {
+           
             ViewBag.AlbumID = new SelectList(db.Albums, "AlbumId", "AlbumName");
             ViewBag.GenreID = new SelectList(db.Genres, "GenreId", "GenreName");
             ViewBag.myTypeID = new SelectList(db.myTypes, "myTypeId", "TypeName");
@@ -68,6 +69,7 @@ namespace SongPlayer.Controllers
         }
 
         // GET: Songs/Edit/5
+        [Authorize]
         public ActionResult Edit(int? id)
         {
             if (id == null)
@@ -105,6 +107,7 @@ namespace SongPlayer.Controllers
         }
 
         // GET: Songs/Delete/5
+        [Authorize]
         public ActionResult Delete(int? id)
         {
             if (id == null)

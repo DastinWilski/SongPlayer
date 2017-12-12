@@ -12,118 +12,75 @@ namespace SongPlayer.Controllers
 {
     public class myTypesController : Controller
     {
-        private ApplicationDbContext db = new ApplicationDbContext();
-
-        // GET: myTypes
+         private ApplicationDbContext db = new ApplicationDbContext();
         [Authorize(Roles = "Admin")]
         public ActionResult Index()
         {
-            return View(db.myTypes.ToList());
-        }
 
-        // GET: myTypes/Details/5
-        public ActionResult Details(int? id)
-        {
-            if (id == null)
-            {
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
-            }
-            myType myType = db.myTypes.Find(id);
-            if (myType == null)
-            {
-                return HttpNotFound();
-            }
-            return View(myType);
-        }
-
-        // GET: myTypes/Create
-        [Authorize]
-        public ActionResult Create()
-        {
             return View();
         }
 
-        // POST: myTypes/Create
-        // Aby zapewnić ochronę przed atakami polegającymi na przesyłaniu dodatkowych danych, włącz określone właściwości, z którymi chcesz utworzyć powiązania.
-        // Aby uzyskać więcej szczegółów, zobacz https://go.microsoft.com/fwlink/?LinkId=317598.
+        // Get Products list
+        [Authorize(Roles = "Admin")]
+        public ActionResult GetProducts()
+        {
+            db.Configuration.ProxyCreationEnabled = false;
+            var tblmyTypes = db.myTypes.ToList();
+
+            return Json(tblmyTypes, JsonRequestBehavior.AllowGet);
+        }
+
+        // Get product by id
+        [Authorize(Roles = "Admin")]
+        public ActionResult Get(int id)
+        {
+            db.Configuration.ProxyCreationEnabled = false;
+            var myType = db.myTypes.ToList().Find(x => x.myTypeId == id);
+            return Json(myType, JsonRequestBehavior.AllowGet);
+        }
+
+        // Create a new product
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Create([Bind(Include = "myTypeId,TypeName")] myType myType)
+        [Authorize(Roles = "Admin")]
+        public ActionResult Create([Bind(Exclude = "myTypeId,Songs")] myType myType)
         {
             if (ModelState.IsValid)
             {
                 db.myTypes.Add(myType);
                 db.SaveChanges();
-                return RedirectToAction("Index");
             }
 
-            return View(myType);
+            return Json(myType, JsonRequestBehavior.AllowGet);
         }
 
-        // GET: myTypes/Edit/5
-        public ActionResult Edit(int? id)
-        {
-            if (id == null)
-            {
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
-            }
-            myType myType = db.myTypes.Find(id);
-            if (myType == null)
-            {
-                return HttpNotFound();
-            }
-            return View(myType);
-        }
-
-        // POST: myTypes/Edit/5
-        // Aby zapewnić ochronę przed atakami polegającymi na przesyłaniu dodatkowych danych, włącz określone właściwości, z którymi chcesz utworzyć powiązania.
-        // Aby uzyskać więcej szczegółów, zobacz https://go.microsoft.com/fwlink/?LinkId=317598.
+        // Update product
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Edit([Bind(Include = "myTypeId,TypeName")] myType myType)
+        [Authorize(Roles = "Admin")]
+        public ActionResult Update([Bind(Exclude = "Songs")]myType myType)
         {
+
             if (ModelState.IsValid)
             {
                 db.Entry(myType).State = EntityState.Modified;
                 db.SaveChanges();
-                return RedirectToAction("Index");
             }
-            return View(myType);
+
+            return Json(myType, JsonRequestBehavior.AllowGet);
         }
 
-        // GET: myTypes/Delete/5
-        public ActionResult Delete(int? id)
+        // Delete product by id
+        [HttpPost]
+        [Authorize(Roles = "Admin")]
+        public ActionResult Delete(int id)
         {
-            if (id == null)
+            var myType = db.myTypes.ToList().Find(x => x.myTypeId == id);
+            if (myType != null)
             {
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+                db.myTypes.Remove(myType);
+                db.SaveChanges();
             }
-            myType myType = db.myTypes.Find(id);
-            if (myType == null)
-            {
-                return HttpNotFound();
-            }
-            return View(myType);
-        }
 
-        // POST: myTypes/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public ActionResult DeleteConfirmed(int id)
-        {
-            myType myType = db.myTypes.Find(id);
-            db.myTypes.Remove(myType);
-            db.SaveChanges();
-            return RedirectToAction("Index");
-        }
-
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                db.Dispose();
-            }
-            base.Dispose(disposing);
+            return Json(myType, JsonRequestBehavior.AllowGet);
         }
     }
 }
